@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>WebSocket Test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style type="text/css">
+    body {
+      background-color: #789; margin: 0;
+      padding: 0; font: 14px Helvetica, Arial, sans-serif;
+    }
+    div.content {
+      width: 800px; margin: 2em auto; padding: 20px 50px;
+      background-color: #fff; border-radius: 1em;
+    }
+    #messages {
+      border: 2px solid #fec; border-radius: 1em;
+      height: 10em; overflow: scroll; padding: 0.5em 1em;
+    }
+    a:link, a:visited { color: #69c; text-decoration: none; }
+    @media (max-width: 700px) {
+      body { background-color: #fff; }
+      div.content {
+        width: auto; margin: 0 auto; border-radius: 0;
+        padding: 1em;
+      }
+    }
+</style>
+
+<script language="javascript" type="text/javascript">
+
+  var rooms = [];
+  //var ws = new WebSocket('ws://' + location.host + '/ws');
+var ws = new WebSocket('ws://localhost:1234/ws');
+
+  if (!window.console) { window.console = { log: function() {} } };
+
+  ws.onopen = function(ev)  {
+      console.log(ev);
+      document.getElementById('wsServerStatus').innerHTML = "Connected";
+  };
+    
+  ws.onerror = function(ev) { console.log(ev); };
+    
+  ws.onclose = function(ev) {
+      console.log(ev);
+      document.getElementById('wsServerStatus').innerHTML = "Disconnected";
+  };
+    
+  ws.onmessage = function(ev) {
+    console.log(ev);
+    try {
+        var resp = JSON.parse(ev.data)
+        if (resp.hasOwnProperty('error')) {
+            var div = document.createElement('div');
+            div.innerHTML = "Error: " + resp['error'];
+            document.getElementById('messages').appendChild(div);
+        }
+        
+        if (resp.hasOwnProperty('apiVersion')) {
+            document.getElementById('apiVersion').innerHTML = "(" + resp.apiVersion + ")";
+        }
+        
+        if (resp.hasOwnProperty('authorized')) {
+            if (resp.authorized === true) {
+                document.getElementById('wsServerStatus').innerHTML = "Authorized";
+                ws.send('{"requestIdentity": true}');
+            }
+        }
+        
+        if (resp.hasOwnProperty('identity')) {
+            document.getElementById('nameId').innerHTML = resp.identity.name;
+            document.getElementById('mapId').innerHTML = resp.identity.map_id;
+        }
+      
+        if (resp.hasOwnProperty('movementUpdate')) {
+            // Update Camera Position
+            document.getElementById('camPosX').innerHTML = resp.movementUpdate.fCameraPosition[0];
+            document.getElementById('camPosY').innerHTML = resp.movementUpdate.fCameraPosition[1];
+            document.getElementById('camPosZ').innerHTML = resp.movementUpdate.fCameraPosition[2];
+            
+            // Update Avatar Position
+            document.getElementById('avaPosX').innerHTML = resp.movementUpdate.fAvatarPosition[0];
+            document.getElementById('avaPosY').innerHTML = resp.movementUpdate.fAvatarPosition[1];
+            document.getElementById('avaPosZ').innerHTML = resp.movementUpdate.fAvatarPosition[2];
+        }
+        
+        if (resp.hasOwnProperty('context')) {
+            var div = document.createElement('div');
+            div.innerHTML = "Context: " + ev.data;
+            document.getElementById('messages').appendChild(div);
+        }
+    } catch(e) {
+        var div = document.createElement('div');
+        div.innerHTML = "Error (" + e + "): " + ev.data;
+        document.getElementById('messages').appendChild(div);
+    }
+
+  };
+
+  window.onload = function() {
+    document.getElementById('send_button').onclick = function(ev) {
+      var msg = document.getElementById('send_input').value;
+      document.getElementById('send_input').value = '';
+      ws.send(msg);
+    };
+    document.getElementById('send_input').onkeypress = function(ev) {
+      if (ev.keyCode == 13 || ev.which == 13) {
+        document.getElementById('send_button').click();
+      }
+    };
+  };
+</script>
+</head>
+<body>
+  <div class="content">
+    <h1>GW2 WebSocket PoC API Demo</h1>
+
+    <p>
+      This page demonstrates how a GW2 WebSocket API could work.
+      Send JSON messages to the server, and see the data the server sends in response.
+    </p>
+    
+    <p>
+      Status: <span id="wsServerStatus">Disconnected</span> <span id="apiVersion"></span>
+    </p>
+      
+    <p>
+      Name: <span id="nameId"></span>
+    </p>
+      
+    <p>
+      Map ID: <span id="mapId"></span>
+    </p>
+      
+    <p>
+      fCameraPosition: <span id="camPosX">null</span>, <span id="camPosY">null</span>, <span id="camPosZ">null</span>
+    </p>
+      
+    <p>
+      fAvatarPosition: <span id="avaPosX">null</span>, <span id="avaPosY">null</span>, <span id="avaPosZ">null</span>
+    </p>
+
+    <div id="messages">
+    </div>
+
+    <p>
+      <input type="text" id="send_input" />
+      <button id="send_button">Send Message</button>
+    </p>
+  </div>
+</body>
+</html>
