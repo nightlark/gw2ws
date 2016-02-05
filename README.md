@@ -7,7 +7,7 @@ Download
 =======
 - Download & extract latest release [here](https://github.com/nightlark/gw2ws/releases)
 - Inject the gw2ws.dll into the Guild Wars 2 process using your tool of choice (note: renaming to gw2dps.dll and using gw2dps.exe works)
-- Open the index.html file in your favorite browser that supports WebSockets after injecting gw2ws.dll
+- Go to (http://nightlark.github.io/gw2ws/) after injecting gw2ws.dll
 - Type in {"appName":"TestApp"} (or another name) to get 'authorized' and allow access to the other parts of the API
 - Typing in {"enableLocation":true} will update your position in real-time on the webpage
 - To exit, hit the Home key
