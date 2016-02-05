@@ -1,0 +1,29 @@
+PROJECT(gw2ws)
+
+# use unicode
+ADD_DEFINITIONS(-DUNICODE -D_UNICODE)
+
+# gw2ws.dll
+ADD_LIBRARY(${PROJECT_NAME}_dll SHARED
+    gw2ws/mongoose.h
+    gw2ws/mongoose.c
+    gw2ws/gw2ws.cpp
+    )
+
+SET_TARGET_PROPERTIES(${PROJECT_NAME}_dll PROPERTIES
+    FOLDER ${PROJECT_NAME}_dll
+    OUTPUT_NAME ${PROJECT_NAME})
+
+TARGET_LINK_LIBRARIES(${PROJECT_NAME}_dll
+    hacklib_gw2)
+
+# gw2ws.exe
+ADD_EXECUTABLE(${PROJECT_NAME}_exe WIN32
+    injector/main.cpp)
+
+SET_TARGET_PROPERTIES(${PROJECT_NAME}_exe PROPERTIES
+    FOLDER ${PROJECT_NAME}_exe
+    OUTPUT_NAME ${PROJECT_NAME})
+
+TARGET_LINK_LIBRARIES(${PROJECT_NAME}_exe
+    hacklib)
